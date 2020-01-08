@@ -1,0 +1,30 @@
+#!/bin/bash
+
+function get_params {
+  while [[ $# -gt 0 ]];
+  do
+    case $1 in
+      *)
+        echo "deploy subcommand does not contain param $1"
+        exit 1
+      ;;
+    esac
+    shift
+  done
+}
+
+function main {
+  get_params "${@}"
+
+  kops toolbox template \
+    --template ${REPO_ROOT}/kops-templates/cluster_tpl.yml \
+    --values ${REPO_ROOT}/kops-templates/cluster_defaults.yml \
+    --values ${REPO_ROOT}/state/kops/vars-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml >  \
+      ${REPO_ROOT}/state/kops/full-manifest-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml
+
+  echo -e "created cluster config:\n${REPO_ROOT}/state/kops/full-manifest-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml"
+  kops replace -f ${REPO_ROOT}/state/kops/full-manifest-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml --force
+
+  kops update cluster ${QUAKE_CLUSTER_NAME}.${QUAKE_TLD} --yes
+
+}

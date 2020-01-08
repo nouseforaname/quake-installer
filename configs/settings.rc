@@ -1,0 +1,5 @@
+export QUAKE_TLD=
+export QUAKE_CLUSTER_NAME=
+
+#DO NOT CHANGE
+export KOPS_STATE_STORE=s3://${QUAKE_TLD}-state

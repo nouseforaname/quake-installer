@@ -1,0 +1,18 @@
+#!/bin/bash
+
+while [[ $# -gt 0 ]];
+do
+  case $1 in
+  -s | --state )
+    shift
+    QUAKE_TF_STATE_PATH="$1"
+    
+    ;;
+  -c | --config)
+    shift
+    QUAKE_YAML_CONFIG_PATH="$1"
+    ;;
+  esac
+done
+
+

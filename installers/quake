@@ -1,0 +1,51 @@
+#!/bin/bash
+export REPO_ROOT="$(git rev-parse --show-toplevel)"
+source ${REPO_ROOT}/.envrc
+
+if [[ -z ${QUAKE_TLD} ]]; then
+  echo "Please provide the QUAKE_TLD Environment Variable before running the script or provide QUAKE_TLD in ${REPO_ROOT}/configs/settings.rc"
+  exit 1
+fi
+
+while [[ $# -gt 0 ]];
+do
+  case $1 in
+  -i | --install )
+    source $REPO_ROOT/installers/subcommands/cli-install
+    main
+  ;;
+  -b | --bootstrap)
+    source $REPO_ROOT/installers/subcommands/bootstrap
+    main
+  ;;
+#TODO
+#  -t | --template)
+#    source $REPO_ROOT/installers/subcommands/template
+#    shift
+#    main "${@}"
+#  ;;
+  -d | --deploy)
+    source $REPO_ROOT/installers/subcommands/deploy
+    shift
+    main "${@}"
+  ;;
+#TODO
+#  -p | --purge)
+#    source $REPO_ROOT/installers/subcommands/purge
+#    main
+#  ;;
+#TODO
+#  -l | --load)
+#    shift
+#    source $REPO_ROOT/installers/subcommands/load
+#    main "${@}"
+#  ;;
+  *)
+    echo "unknown subcommand or parameter $1"
+    exit 1
+  ;;
+  esac
+  shift
+done
+
+

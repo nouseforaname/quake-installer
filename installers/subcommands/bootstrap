@@ -1,0 +1,33 @@
+#!/bin/bash
+
+function get_params {
+  while [[ $# -gt 0 ]];
+  do
+    case $1 in
+      *)
+        shift
+      ;;
+    esac
+  done
+}
+
+function main {
+  get_params
+  TF_STATE_PATH=${REPO_ROOT}/state/tf/${QUAKE_TLD}.tfstate
+  pushd ${REPO_ROOT}/terraform
+    echo -e "running\nterraform init --backend-config=\"path=${TF_STATE_PATH}\""
+    terraform init --backend-config="path=${TF_STATE_PATH}" &> /dev/null
+    echo -e "running\nterraform apply -auto-approve"
+    terraform apply -auto-approve
+
+    echo "creating kops vars yml for ${QUAKE_CLUSTER_NAME} in ${REPO_ROOT}/state/kops/vars-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml"
+    yq r <( terraform output -json |
+        jq  'to_entries | map ( .value= .value.value ) | from_entries ') \
+    > ${REPO_ROOT}/state/kops/vars-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml
+
+    for VAR in $(env|grep QUAKE); do 
+      echo ${VAR} | sed 's#QUAKE_\(.*\)=#QUAKE_\1: #' >> ${REPO_ROOT}/state/kops/vars-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml
+    done
+  popd
+
+}

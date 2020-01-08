@@ -1,6 +1,7 @@
 bin/*
 downloads/*
-configs/*
 state/*
 .awsrc
 **tfstate**
+terraform/.terraform
+**.sw?

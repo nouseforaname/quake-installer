@@ -1,0 +1,66 @@
+#!/bin/bash
+
+function get_params {
+  while [[ $# -gt 0 ]];
+  do
+    case $1 in
+    --os)
+      shift
+      OS=$1
+      ;;
+    esac
+      shift
+  done
+}
+function main {
+  get_params $#
+
+  #CHECKS
+  if [ -z ${OS} ]; then
+    echo "no os provided, valid options are linux|darwin"
+    exit 1
+  fi
+
+  ### RELEASE VERSIONS ARE IN ${REPO_ROOT}/configs/versions.rc
+  source ${REPO_ROOT}/configs/versions.rc
+
+  DOWNLOAD_LIST=(
+  "https://github.com/kubernetes/kops/releases/download/${KOPS_VERSION}/kops-${OS}-amd64"
+  "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_${OS}_amd64"
+  "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_${OS}_amd64.zip"
+  "https://github.com/argoproj/argo-cd/releases/download/v${ARGOCD_VERSION}/argocd-${OS}-amd64"
+  "https://github.com/argoproj/argo/releases/download/v${ARGO_VERSION}/argo-${OS}-amd64"
+  "https://get.helm.sh/helm-v${HELM_VERSION}-${OS}-amd64.tar.gz"
+  )
+
+  DOWNLOAD_LIST_OSX=(
+  "https://github.com/stedolan/jq/releases/download/jq-$JQ_VERSION/jq-osx-amd64"
+  )
+
+  DOWNLOAD_LIST_LINUX=(
+  "https://github.com/stedolan/jq/releases/download/jq-$JQ_VERSION/jq-${OS}64"
+  )
+  if [[ "${OS}" == "linux" ]]; then
+    DOWNLOAD_LIST=( "${DOWNLOAD_LIST[@]}" "${DOWNLOAD_LIST_LINUX[@]}" )
+  elif [[ "${OS}" == "darwin" ]]; then
+    DOWNLOAD_LIST=( "${DOWNLOAD_LIST[@]}" "${DOWNLOAD_LIST_OSX[@]}" )
+  fi
+  set -e
+  for ITEM in "${DOWNLOAD_LIST[@]}"; do
+    echo "downloading ${ITEM}" 
+    wget -c "${ITEM}" -q --show-progress -P "${REPO_ROOT}/downloads"
+  done
+  set +e
+
+  pushd ${REPO_ROOT}/downloads
+    unzip -o terraform_*.zip
+    tar -xzf helm-*.tar.gz
+    mv linux-amd64/helm .
+
+    #RENAME BINARIES
+    for FILE in $(ls -p | grep -v "\.zip\|tar\.gz\|/"); do cp ${FILE} "${REPO_ROOT}/bin/$(echo "${FILE}" | sed -E -e 's#-.*|_.*##')"; done
+    chmod +x ${REPO_ROOT}/bin/*
+  popd
+}
+
+

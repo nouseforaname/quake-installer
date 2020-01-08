@@ -1,0 +1,141 @@
+apiVersion: kops/v1alpha2
+kind: Cluster
+metadata:
+  creationTimestamp: null
+  name: {{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}
+spec:
+  api:
+    loadBalancer:
+      sslCertificate: {{ .QUAKE_CLUSTER_CERT_ARN }}
+      type: Public
+  authorization:
+    rbac: {}
+  channel: stable
+  cloudLabels:
+    Environment: {{ .QUAKE_TLD }} 
+    Cluster: {{ .QUAKE_CLUSTER_NAME }}
+  cloudProvider: aws
+  configBase: s3://{{ .QUAKE_TLD }}-state/{{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}
+  dnsZone: {{ .QUAKE_HOSTED_ZONE_ID }}
+  etcdClusters:
+  - etcdMembers:
+{{- range .QUAKE_MASTER_ZONES }}
+    - instanceGroup: master-{{ $.QUAKE_CLUSTER_NAME }}-{{ $.QUAKE_TLD }}{{.}}
+      name: {{ . }}
+{{- end }}
+    name: main
+    version: 3.2.24
+  - etcdMembers:
+{{- range .QUAKE_MASTER_ZONES }}
+    - instanceGroup: master-{{ $.QUAKE_CLUSTER_NAME }}-{{ $.QUAKE_TLD }}{{.}}
+      name: {{ . }}
+{{- end }}
+    name: events
+    version: 3.2.24
+  iam:
+    allowContainerRegistry: true
+    legacy: false
+  kubelet:
+    anonymousAuth: false
+    authenticationTokenWebhook: true
+    authorizationMode: Webhook
+  kubernetesApiAccess:
+  - 0.0.0.0/0
+  kubernetesVersion: 1.15.6
+  masterPublicName: api.{{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}
+  networkCIDR: {{ .QUAKE_VPC_CIDR }}
+  networkID: {{ .QUAKE_VPC_ID }}
+  networking:
+    calico:
+      majorVersion: v3
+      crossSubnet: true
+  nonMasqueradeCIDR: 100.64.0.0/10
+  sshAccess:
+  - {{ .QUAKE_VPC_CIDR }}
+  subnets:
+  - cidr: 10.0.32.0/19
+    name: {{ .QUAKE_REGION }}a
+    type: Private
+    zone: {{ .QUAKE_REGION }}a
+  - cidr: 10.0.64.0/19
+    name: {{ .QUAKE_REGION }}b
+    type: Private
+    zone: {{ .QUAKE_REGION }}b
+  - cidr: 10.0.96.0/19
+    name: {{ .QUAKE_REGION }}c
+    type: Private
+    zone: {{ .QUAKE_REGION }}c
+  - cidr: 10.0.0.0/22
+    name: utility-{{ .QUAKE_REGION }}a
+    type: Utility
+    zone: {{ .QUAKE_REGION }}a
+  - cidr: 10.0.4.0/22
+    name: utility-{{ .QUAKE_REGION }}b
+    type: Utility
+    zone: {{ .QUAKE_REGION }}b
+  - cidr: 10.0.8.0/22
+    name: utility-{{ .QUAKE_REGION }}c
+    type: Utility
+    zone: {{ .QUAKE_REGION }}c
+  topology:
+    bastion:
+      bastionPublicName: bastion.{{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}
+    dns:
+      type: Public
+    masters: private
+    nodes: private
+
+{{- range .QUAKE_MASTER_ZONES }}
+---
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: {{ $.QUAKE_CLUSTER_NAME }}.{{ $.QUAKE_TLD }}
+    Role: master
+  name: master-{{ $.QUAKE_CLUSTER_NAME }}-{{ $.QUAKE_TLD }}{{.}}
+spec:
+  image: kope.io/k8s-1.15-debian-stretch-amd64-hvm-ebs-2019-09-26
+  machineType: {{ $.QUAKE_MASTER_SIZE }}
+  maxSize: {{ $.QUAKE_MASTER_COUNT }}
+  minSize: 1
+  cloudLabels:
+    kops.k8s.io/instancegroup: master-{{ $.QUAKE_CLUSTER_NAME }}-{{ $.QUAKE_TLD }}{{.}}
+  role: Master
+  subnets:
+  - {{ $.QUAKE_REGION }}{{.}}
+{{- end }}
+
+---
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: {{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}
+  name: worker-{{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}
+spec:
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: "true"
+    k8s.io/cluster-autoscaler/{{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}: "{{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}"
+    Role: worker
+  image: kope.io/k8s-1.15-debian-stretch-amd64-hvm-ebs-2019-09-26
+  machineType:  {{ .QUAKE_NODE_SIZE }}
+  maxSize: {{ .QUAKE_NODE_COUNT }}
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes
+  role: Node
+  subnets:
+  - {{ .QUAKE_REGION }}a
+  - {{ .QUAKE_REGION }}b
+  - {{ .QUAKE_REGION }}c
+---
+apiVersion: kops/v1alpha2
+kind: SSHCredential
+metadata:
+  labels:
+    kops.k8s.io/cluster: {{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}
+spec:
+  publicKey: {{ .QUAKE_CLUSTER_SSH_PUB }}
