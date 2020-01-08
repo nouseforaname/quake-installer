@@ -2,7 +2,7 @@
 
 
 # edit .awsrc with your creds and region
-# edit configs/settings.rc and provide your QUAKE_TLD. This will be used to create a hosted zone, you can take care of delegating DNS with your provider after.
+# edit configs/settings.rc and provide your QUAKE_TLD and your QUAKE_CLUSTER_NAME. This will be used to create certs, a hosted zone and a few other things. you can take care of delegating DNS with your provider after you are past the bootstrap (terraform) step.
 #run `direnv allow`
 #run `installers/quake --install` to install all required clis into the bin dir of this repo. 
 #run `installers/quake --bootstrap` To run terraform and manipulate the outputs into config files
