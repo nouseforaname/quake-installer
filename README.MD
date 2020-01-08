@@ -1,4 +1,10 @@
-# edit .awsrc with your creds and region
-# edit .
+# this repo assumes you have direnv as well as git configured and running properly. Run `direnv allow`in this repository to make your life easier. Else you will have to `source .envrc` for the rest of the scripts to work
 
-# 
+
+# edit .awsrc with your creds and region
+# edit configs/settings.rc and provide your QUAKE_TLD. This will be used to create a hosted zone, you can take care of delegating DNS with your provider after.
+#run `direnv allow`
+#run `installers/quake --install` to install all required clis into the bin dir of this repo. 
+#run `installers/quake --bootstrap` To run terraform and manipulate the outputs into config files
+#run `installers/quake --deploy` to interpolate the provided kops cluster template with defaults and terraform outputs. It will safe a full cluster and a clusters vars YAML into the state directory.
+#you should now have a kubernetes cluster up and running 
