@@ -1,2 +1,6 @@
 bin/*
-
+downloads/*
+configs/*
+state/*
+.awsrc
+**tfstate**
