@@ -13,13 +13,14 @@ function main {
     esac
     shift
   done
-  }
+
   TF_STATE_PATH=${REPO_ROOT}/state/tf/${QUAKE_TLD}.tfstate
 
   pushd ${REPO_ROOT}/terraform
     echo -e "running\nterraform init --backend-config=\"path=${TF_STATE_PATH}\""
     terraform init --backend-config="path=${TF_STATE_PATH}" &> /dev/null
-    echo -e "running\nterraform desctroy ${SPARK}"
+    echo -e "running\nterraform destroy ${SPARK}"
     terraform destroy ${SPARK}
-  pop 
+  popd
+}
 
