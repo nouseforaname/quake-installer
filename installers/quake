@@ -29,11 +29,10 @@ do
     shift
     main "${@}"
   ;;
-#TODO
-#  -p | --purge)
-#    source $REPO_ROOT/installers/subcommands/purge
-#    main
-#  ;;
+  -p | --purge)
+    source $REPO_ROOT/installers/subcommands/purge
+    main "${@}"
+  ;;
   -B | --boom )
     shift
     source $REPO_ROOT/installers/subcommands/boom
