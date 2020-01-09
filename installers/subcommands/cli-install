@@ -47,7 +47,7 @@ function main {
   fi
   set -e
   for ITEM in "${DOWNLOAD_LIST[@]}"; do
-    echo "downloading ${ITEM}" 
+    echo "downloading ${ITEM}"
     wget -c "${ITEM}" -q --show-progress -P "${REPO_ROOT}/downloads"
   done
   set +e
@@ -55,12 +55,10 @@ function main {
   pushd ${REPO_ROOT}/downloads
     unzip -o terraform_*.zip
     tar -xzf helm-*.tar.gz
-    mv linux-amd64/helm .
+    mv ${OS}-amd64/helm .
 
     #RENAME BINARIES
     for FILE in $(ls -p | grep -v "\.zip\|tar\.gz\|/"); do cp ${FILE} "${REPO_ROOT}/bin/$(echo "${FILE}" | sed -E -e 's#-.*|_.*##')"; done
     chmod +x ${REPO_ROOT}/bin/*
   popd
 }
-
-
