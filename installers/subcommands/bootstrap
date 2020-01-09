@@ -21,7 +21,6 @@ function main {
     terraform apply -auto-approve
 
     echo "creating kops vars yml for ${QUAKE_CLUSTER_NAME} in ${REPO_ROOT}/state/kops/vars-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml"
-    mkdir -p ${REPO_ROOT}/state/kops
     yq r <( terraform output -json |
         jq  'to_entries | map ( .value= .value.value ) | from_entries ') \
     > ${REPO_ROOT}/state/kops/vars-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml
