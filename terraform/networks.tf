@@ -4,7 +4,7 @@ resource "aws_vpc" "quake" {
 }
 
 resource "aws_internet_gateway" "gw" {
-  vpc_id = "${aws_vpc.quake.id}"
+  vpc_id = aws_vpc.quake.id
 
   tags = {
     Name = "main"
