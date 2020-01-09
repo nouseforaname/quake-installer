@@ -41,7 +41,7 @@ spec:
     authorizationMode: Webhook
   kubernetesApiAccess:
   - 0.0.0.0/0
-  kubernetesVersion: 1.15.6
+  kubernetesVersion: {{ $.QUAKE_KUBE_VERSION }}
   masterPublicName: api.{{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}
   networkCIDR: {{ .QUAKE_VPC_CIDR }}
   networkID: {{ .QUAKE_VPC_ID }}
@@ -53,30 +53,16 @@ spec:
   sshAccess:
   - {{ .QUAKE_VPC_CIDR }}
   subnets:
-  - cidr: 10.0.32.0/19
-    name: {{ .QUAKE_REGION }}a
+{{- range $index, $zone := .QUAKE_MASTER_ZONES }}
+  - cidr: 10.0.{{ mul 32 $index | add 96 }}.0/19
+    name: {{ $.QUAKE_REGION }}{{ $zone }}
     type: Private
-    zone: {{ .QUAKE_REGION }}a
-  - cidr: 10.0.64.0/19
-    name: {{ .QUAKE_REGION }}b
-    type: Private
-    zone: {{ .QUAKE_REGION }}b
-  - cidr: 10.0.96.0/19
-    name: {{ .QUAKE_REGION }}c
-    type: Private
-    zone: {{ .QUAKE_REGION }}c
-  - cidr: 10.0.0.0/22
-    name: utility-{{ .QUAKE_REGION }}a
+    zone: {{ $.QUAKE_REGION }}{{ $zone }}
+  - cidr: 10.0.{{ mul 8 $index | add 8 }}.0/21
+    name: utility-{{ $.QUAKE_REGION }}{{ $zone }}
     type: Utility
-    zone: {{ .QUAKE_REGION }}a
-  - cidr: 10.0.4.0/22
-    name: utility-{{ .QUAKE_REGION }}b
-    type: Utility
-    zone: {{ .QUAKE_REGION }}b
-  - cidr: 10.0.8.0/22
-    name: utility-{{ .QUAKE_REGION }}c
-    type: Utility
-    zone: {{ .QUAKE_REGION }}c
+    zone: {{ $.QUAKE_REGION }}{{ $zone }}
+{{- end }} 
   topology:
     bastion:
       bastionPublicName: bastion.{{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}
@@ -96,7 +82,7 @@ metadata:
     Role: master
   name: master-{{ $.QUAKE_CLUSTER_NAME }}-{{ $.QUAKE_TLD }}{{.}}
 spec:
-  image: kope.io/k8s-1.15-debian-stretch-amd64-hvm-ebs-2019-09-26
+  image: {{ $.QUAKE_BASE_IMAGE }}
   machineType: {{ $.QUAKE_MASTER_SIZE }}
   maxSize: {{ $.QUAKE_MASTER_COUNT }}
   minSize: 1
@@ -120,7 +106,7 @@ spec:
     k8s.io/cluster-autoscaler/enabled: "true"
     k8s.io/cluster-autoscaler/{{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}: "{{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}"
     Role: worker
-  image: kope.io/k8s-1.15-debian-stretch-amd64-hvm-ebs-2019-09-26
+  image: {{ .QUAKE_BASE_IMAGE }}
   machineType:  {{ .QUAKE_NODE_SIZE }}
   maxSize: {{ .QUAKE_NODE_COUNT }}
   minSize: 1
@@ -128,9 +114,9 @@ spec:
     kops.k8s.io/instancegroup: nodes
   role: Node
   subnets:
-  - {{ .QUAKE_REGION }}a
-  - {{ .QUAKE_REGION }}b
-  - {{ .QUAKE_REGION }}c
+{{- range $index, $zone := .QUAKE_MASTER_ZONES }}
+  - {{ $.QUAKE_REGION }}{{ $zone }}
+{{- end }}
 ---
 apiVersion: kops/v1alpha2
 kind: SSHCredential
