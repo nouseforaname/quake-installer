@@ -1,0 +1,20 @@
+#!/bin/bash
+function main {
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+    -y | --yes )
+      SPARK="--yes"
+    ;;
+    -t | --tld )
+      shift
+      QUAKE_TLD=$1
+    ;;
+    -c | --cluster-name )
+      shift
+      QUAKE_CLUSTER_NAME=$1
+    ;;
+    esac
+    shift
+  done
+  kops delete cluster ${QUAKE_CLUSTER_NAME}.${QUAKE_TLD} ${SPARK}
+}

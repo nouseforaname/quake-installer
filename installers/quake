@@ -34,12 +34,11 @@ do
 #    source $REPO_ROOT/installers/subcommands/purge
 #    main
 #  ;;
-#TODO
-#  -l | --load)
-#    shift
-#    source $REPO_ROOT/installers/subcommands/load
-#    main "${@}"
-#  ;;
+  -B | --boom )
+    shift
+    source $REPO_ROOT/installers/subcommands/boom
+    main "${@}"
+  ;;
   *)
     echo "unknown subcommand or parameter $1"
     exit 1
