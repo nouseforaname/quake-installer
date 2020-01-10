@@ -18,6 +18,10 @@ do
     source $REPO_ROOT/installers/subcommands/bootstrap
     main
   ;;
+  -p | --purge)
+    source $REPO_ROOT/installers/subcommands/purge
+    main "${@}"
+  ;;
 #TODO
 #  -t | --template)
 #    source $REPO_ROOT/installers/subcommands/template
@@ -29,13 +33,14 @@ do
     shift
     main "${@}"
   ;;
-  -p | --purge)
-    source $REPO_ROOT/installers/subcommands/purge
-    main "${@}"
-  ;;
-  -B | --boom )
+  -D | --delete )
     shift
     source $REPO_ROOT/installers/subcommands/boom
+    main "${@}"
+  ;;
+  -l | --loadout )
+    shift
+    source $REPO_ROOT/installers/subcommands/loadout
     main "${@}"
   ;;
   *)

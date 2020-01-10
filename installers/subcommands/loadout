@@ -1,0 +1,51 @@
+#!/bin/bash
+function get_params {
+  while [[ $# -gt 0 ]];
+  do
+    case $1 in
+    *)
+      exit 1
+    ;;
+    esac
+    shift
+  done
+}
+
+function main {
+  kubectl create namespace quake-system &> /dev/null
+  local INDEX=0
+  while true; do
+    REPO=$(yq r ${REPO_ROOT}/helm-templates/helm-sources.yml "QUAKE_HELM_SOURCES.${INDEX}.url")
+    NAME=$(yq r ${REPO_ROOT}/helm-templates/helm-sources.yml "QUAKE_HELM_SOURCES.${INDEX}.name")
+    if [[ "${REPO}" == "null" ]]; then
+      break
+    fi
+    echo "helm repo add $(echo $REPO | sed 's#.*/##') $REPO"
+    helm repo add $(echo $REPO | sed 's#.*/##') $REPO
+    ((INDEX+=1))
+  done
+  helm repo update
+  local INDEX=0
+  while true; do
+    local NAME=$(yq r ${REPO_ROOT}/helm-templates/helm-sources.yml "QUAKE_HELM_INSTALL_CHARTS.${INDEX}.name")
+    local CHART_VERSION=$(yq r ${REPO_ROOT}/helm-templates/helm-sources.yml "QUAKE_HELM_INSTALL_CHARTS.${INDEX}.version")
+    if [[ "${NAME}" == "null" ]]; then
+      break
+    fi
+    
+    local CHART=$(echo ${NAME} | sed 's#.*/##')
+    local HELM_STATE=${REPO_ROOT}/state/helm/${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}
+    mkdir -p ${HELM_STATE} &> /dev/null
+    yq r <( kops toolbox template \
+      --template helm-templates/helm-values-template.yml \
+      --values ${REPO_ROOT}/state/kops/vars-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml \
+    ) ${CHART} > ${HELM_STATE}/${CHART}-values.yml
+
+    helm upgrade --install ${CHART} ${NAME} \
+      --values ${HELM_STATE}/${CHART}-values.yml \
+      --version ${CHART_VERSION} \
+      --namespace quake-system
+      
+    ((INDEX+=1))
+  done
+}
