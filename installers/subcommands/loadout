@@ -41,12 +41,10 @@ function main {
       --values ${REPO_ROOT}/state/kops/vars-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml \
     ) ${CHART} > ${HELM_STATE}/${CHART}-values.yml
 
-
-    helm upgrade --install ${CHART} ${NAME} \
+    helm upgrade --wait --install ${CHART} ${NAME} \
       --values ${HELM_STATE}/${CHART}-values.yml \
       --version ${CHART_VERSION} \
       --namespace quake-system
-      
     ((INDEX+=1))
   done
 }
