@@ -1,0 +1,94 @@
+aws-alb-ingress-controller:
+  clusterName: "{{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}"
+  autoDiscoverAwsRegion: true
+  autoDiscoverAwsVpcID: true
+external-dns:
+  image:
+    registry: docker.io
+    repository: bitnami/external-dns
+    tag: 0.5.17-debian-9-r91
+    pullPolicy: IfNotPresent
+  sources:
+  - service
+  - ingress
+  provider: aws
+  namespace: quake-system
+  aws:
+  #TODO switch to tied down secret or IAM profile
+    credentials:
+      secretKey: "{{ .QUAKE_SECRET_ACCESS_KEY }}"
+      accessKey: "{{ .QUAKE_ACCESS_KEY_ID }}"
+      ## pre external-dns 0.5.9 home dir should be `/root/.aws`
+      ##
+      mountPath: "/.aws"
+    ## AWS region
+    ##
+    region: "{{ .QUAKE_DEFAULT_REGION }}"
+    ## Zone Filter. Available values are: public, private
+    ##
+    zoneType: "public"
+
+# ARGO WORKFLOWS
+
+argo:
+  namespace: quake-system
+  crdVersion: v1alpha1
+  installCRD: true
+  ui:
+    forceNamespaceIsolation: false
+    #TODO ENABLE USAGE OF INGRESS
+    ingress:
+      enabled: false
+  images:
+    namespace: argoproj
+    controller: workflow-controller
+    ui: argoui
+    executor: argoexec
+    pullPolicy: Always
+    tag: v2.4.3
+
+# ARGO EVENTS
+
+argo-events:
+  namespace: quake-system
+  singleNamespace: false
+
+  installCRD: true
+
+  imagePullPolicy: IfNotPresent
+
+  sensorController:
+    name: sensor-controller
+    image: sensor-controller
+    tag: v0.11
+    replicaCount: 1
+
+  gatewayController:
+    name: gateway-controller
+    image: gateway-controller
+    tag: v0.11
+    replicaCount: 1
+
+argo-cd:
+
+  installCRDs: true
+
+  global:
+    image:
+      repository: argoproj/argocd
+      tag: v1.3.6
+      imagePullPolicy: IfNotPresent
+
+  service:
+    annotations: {}
+    labels: {}
+    port: 8082
+
+  server:
+    service:
+      type: LoadBalancer
+      annotations:
+        'external-dns.alpha.kubernetes.io/hostname': "argo.{{ .QUAKE_TLD }}"
+        'service.beta.kubernetes.io/aws-load-balancer-backend-protocol': "https"
+        'service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy': "ELBSecurityPolicy-TLS-1-2-2017-01"
+        service.beta.kubernetes.io/aws-load-balancer-ssl-cert: " {{ .QUAKE_CLUSTER_CERT_ARN }}"
