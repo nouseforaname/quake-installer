@@ -7,6 +7,12 @@ output "QUAKE_CLUSTER_SSH_KEY" {
 output "QUAKE_CLUSTER_SSH_PUB" {
   value       = tls_private_key.quake.public_key_openssh
 }
+output "QUAKE_CLUSTER_GITOPS_SSH_KEY" {
+  value       = tls_private_key.quake_gitops.private_key_pem
+}
+output "QUAKE_CLUSTER_GITOPS_SSH_PUB" {
+  value       = tls_private_key.quake_gitops.public_key_openssh
+}
 output "QUAKE_CLUSTER_NAME" {
   value       = var.CLUSTER_NAME
 }
