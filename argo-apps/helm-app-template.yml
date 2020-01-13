@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .APP_NAME }}
+  # You'll usually want to add your resources to the argocd namespace.
+  namespace: {{ .APP_NAMESPACE }}
+  # Add a this finalizer ONLY if you want these to cascade delete.
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  # DEPLOY ON SELF
+  destination:
+    server: https://kubernetes.default.svc
+  # The project the application belongs to.
+  project: default
+
+  # Source of the application manifests
+  source:
+    repoURL: {{ .APP_HELM_REPO_URL }}
+    targetRevision: {{ .APP_HELM_CHART_VERSION }}
+    path: {{ .APP_HELM_PATH }}
+
+    # helm specific config
+    helm:
+      # Extra parameters to set (same as setting through values.yaml, but these take precedence)
+      releaseName: {{ default .APP_NAME .APP_RELEASE_NAME }}
+
+      # Values file as block file
+      values: |
+        {{ .APP_VALUES_INLINE_YAML | nindent 8 }}
