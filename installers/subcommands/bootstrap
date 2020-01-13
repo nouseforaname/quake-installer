@@ -24,9 +24,9 @@ function main {
     yq r <( terraform output -json |
         jq  'to_entries | map ( .value= .value.value ) | from_entries ') \
     > ${REPO_ROOT}/state/kops/vars-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml
-
-    for VAR in $(env|grep QUAKE); do
-      echo ${VAR} | sed 's#QUAKE_\(.*\)=#QUAKE_\1: #' >> ${REPO_ROOT}/state/kops/vars-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml
+    for VAR in $(env|grep "QUAKE_\|AWS_"); do 
+      echo $VAR | sed -E 's#QUAKE_(.*)=|AWS_(.*)=#QUAKE_\2\1: #' \
+        >> ${REPO_ROOT}/state/kops/vars-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml
     done
   popd
 
