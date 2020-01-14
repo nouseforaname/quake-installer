@@ -1,0 +1,29 @@
+#!/bin/bash
+function main {
+local CHARTINDEX=0
+while CHART=$(yq r ${REPO_ROOT}/helm-templates/helm-sources.yml QUAKE_HELM_INSTALL_CHARTS.$CHARTINDEX.name); do
+  if [[ "${CHART}" == "null" ]]; then
+    break
+  fi
+  CHART_NAME=$(echo "${CHART}" | sed 's#.*/##')
+  CHART_REPO_NAME=$(echo "${CHART}" | sed 's#/.*##')
+
+  REPO_INDEX=0
+  until [[ "$(yq r ${REPO_ROOT}/helm-templates/helm-sources.yml QUAKE_HELM_SOURCES.${REPO_INDEX}.name)" == "${CHART_REPO_NAME}" ]]; do
+    ((REPO_INDEX+=1))
+  done
+
+  mkdir -p ${REPO_ROOT}/state/argo/${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}
+  kops toolbox template \
+    --fail-on-missing=false \
+    --template ${REPO_ROOT}/argo-apps/helm-app-template.yml \
+    --set APP_NAME="quake-${CHART_NAME}" \
+    --set APP_NAMESPACE="quake-system" \
+    --set APP_HELM_REPO_URL="$( yq r ${REPO_ROOT}/helm-templates/helm-sources.yml QUAKE_HELM_SOURCES.${REPO_INDEX}.url)" \
+    --set APP_HELM_CHART_VERSION="$( yq r ${REPO_ROOT}/helm-templates/helm-sources.yml QUAKE_HELM_INSTALL_CHARTS.${CHARTINDEX}.version )" \
+    --set APP_HELM_CHART_NAME="${CHART_NAME}" \
+    --set APP_VALUES_INLINE_YAML="$( cat ${REPO_ROOT}/state/helm/${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}/${CHART_NAME}-values.yml)" > ${REPO_ROOT}/state/argo/${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}/${CHART_NAME}-application.yml
+  kubectl apply -f ${REPO_ROOT}/state/argo/${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}/${CHART_NAME}-application.yml -n quake-system
+  ((CHARTINDEX+=1))
+done
+}
