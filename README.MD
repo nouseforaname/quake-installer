@@ -21,5 +21,21 @@ To run terraform and manipulate the outputs into config files
 ```installers/quake --deploy```
 to interpolate the provided kops cluster template with defaults and terraform outputs. It will safe a full cluster and a clusters vars YAML into the state directory.
 
-
 ### you should now have a kubernetes cluster up and running 
+
+
+On DEV Branch:
+### Deploy ArgoCD, External-DNS, and Ingress via HELM
+```installers/quake --loadout```
+### Template & Register Quake System HELM Applications via with argo KubeCTL
+```installers/quake --template```
+
+###
+### Delete Cluster
+Remove KOPS Related Resources
+```installers/quake --delete```
+
+### Purge TF
+Remove TF Related Resources
+```installer/quake --purge``` 
+
