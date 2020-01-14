@@ -27,8 +27,8 @@ to interpolate the provided kops cluster template with defaults and terraform ou
 On DEV Branch:
 ### Deploy ArgoCD, External-DNS, and Ingress via HELM
 ```installers/quake --loadout```
-### Register Quake System HELM Applications via KubeCTL
-```installers/quake --bfg```
+### Template & Register Quake System HELM Applications via with argo KubeCTL
+```installers/quake --template```
 
 ###
 ### Delete Cluster
