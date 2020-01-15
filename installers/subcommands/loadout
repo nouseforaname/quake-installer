@@ -12,6 +12,7 @@ function get_params {
 }
 
 function main {
+  kops export kubecfg ${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}
   kubectl create namespace quake-system &> /dev/null
   local INDEX=0
   while true; do
