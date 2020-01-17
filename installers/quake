@@ -22,16 +22,16 @@ do
     source $REPO_ROOT/installers/subcommands/purge
     main "${@}"
   ;;
-#TODO
-#  -t | --template)
-#    source $REPO_ROOT/installers/subcommands/template
-#    shift
-#    main "${@}"
-#  ;;
-  -d | --deploy)
-    source $REPO_ROOT/installers/subcommands/deploy
+  -t | --template-apps)
+    source $REPO_ROOT/installers/subcommands/template
     shift
     main "${@}"
+  ;;
+  -d | --deploy)
+    shift
+    source $REPO_ROOT/installers/subcommands/deploy
+    main "${@}"
+    break;
   ;;
   -D | --delete )
     shift

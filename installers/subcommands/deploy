@@ -4,6 +4,18 @@ function get_params {
   while [[ $# -gt 0 ]];
   do
     case $1 in
+      -o | --output)
+        shift
+        if [[ "$1" == "tf" ]]; then
+          KOPS_TF_PATH=${REPO_ROOT}/kops-terraform-output/
+          mkdir -p ${KOPS_TF_PATH}
+          echo "creating tf config files in ${KOPS_TF_PATH}"
+          TF_PARAMS=( "--out=${KOPS_TF_PATH}" "--target=terraform" )
+        else 
+          echo "error, output does not support ${1}"
+        fi 
+
+      ;;
       *)
         echo "deploy subcommand does not contain param $1"
         exit 1
@@ -25,6 +37,6 @@ function main {
   echo -e "created cluster config:\n${REPO_ROOT}/state/kops/full-manifest-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml"
   kops replace -f ${REPO_ROOT}/state/kops/full-manifest-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml --force
 
-  kops update cluster ${QUAKE_CLUSTER_NAME}.${QUAKE_TLD} --yes
+  kops update cluster ${QUAKE_CLUSTER_NAME}.${QUAKE_TLD} --yes ${TF_PARAMS[@]}
 
 }
