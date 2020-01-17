@@ -20,6 +20,8 @@ To run terraform and manipulate the outputs into config files
 ### finish level
 ```installers/quake --deploy```
 to interpolate the provided kops cluster template with defaults and terraform outputs. It will safe a full cluster and a clusters vars YAML into the state directory.
+to play with KOPS TF feature, you can use 
+```ìnstallers/quake --deploy -o tf``` it will instead create the `kops-terraform-output` folder and save generated TF there
 
 ### you should now have a kubernetes cluster up and running 
 
