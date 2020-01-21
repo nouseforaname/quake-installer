@@ -39,10 +39,10 @@ output "QUAKE_VPC_CIDR" {
 output "QUAKE_KMS_ARN" {
   value       =  aws_kms_key.kops_state.arn
 }
-/*
-output "QUAKE_" {
-  value       =  
+output "QUAKE_ARGO_PASSWORD" {
+  value       =  random_password.argo_admin_password.result
 }
+/*
 output "QUAKE_" {
   value       =  
 } 
