@@ -36,10 +36,10 @@ output "QUAKE_VPC_ID" {
 output "QUAKE_VPC_CIDR" {
   value       =  aws_vpc.quake.cidr_block
 }
-/*
-output "QUAKE_" {
-  value       =  
+output "QUAKE_KMS_ARN" {
+  value       =  aws_kms_key.kops_state.arn
 }
+/*
 output "QUAKE_" {
   value       =  
 }

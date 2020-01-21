@@ -36,8 +36,45 @@ spec:
     allowContainerRegistry: true
     legacy: false
   additionalPolicies:
+{{- if .QUAKE_KMS_ARN }}
+    master: |
+      [
+        {
+          "Sid": "{{ .QUAKE_CLUSTER_NAME }}-{{ .QUAKE_TLD }}-KMS",
+          "Effect": "Allow",
+          "Action": [
+            "kms:CreateGrant",
+            "kms:Decrypt",
+            "kms:DescribeKey",
+            "kms:Encrypt",
+            "kms:GenerateDataKey*",
+            "kms:ReEncrypt*"
+          ],
+          "Resource": [
+            "{{ .QUAKE_KMS_ARN }}"
+          ]
+        }
+      ]
+{{- end }}
     node: |
       [
+{{- if .QUAKE_KMS_ARN }}
+        {
+          "Sid": "{{ .QUAKE_CLUSTER_NAME }}-{{ .QUAKE_TLD }}-KMS",
+          "Effect": "Allow",
+          "Action": [
+            "kms:CreateGrant",
+            "kms:Decrypt",
+            "kms:DescribeKey",
+            "kms:Encrypt",
+            "kms:GenerateDataKey*",
+            "kms:ReEncrypt*"
+          ],
+          "Resource": [
+            "{{ .QUAKE_KMS_ARN }}"
+          ]
+        },
+{{- end }}
        {
          "Effect": "Allow",
          "Action": [
@@ -281,6 +318,8 @@ spec:
   machineType: t2.micro
   maxSize: 1
   minSize: 1
+  sshAccess:
+  - 0.0.0.0/0
   subnets:
   {{- range $index, $zone := .QUAKE_MASTER_ZONES }}
     - {{ $.QUAKE_REGION }}{{ $zone }}
