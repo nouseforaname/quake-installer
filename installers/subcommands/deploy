@@ -4,6 +4,10 @@ function get_params {
   while [[ $# -gt 0 ]];
   do
     case $1 in
+      -j | --jumphost )
+        shift
+        QUAKE_BASTION=true
+      ;;
       -o | --output)
         shift
         if [[ "$1" == "tf" ]]; then
@@ -31,7 +35,8 @@ function main {
   kops toolbox template \
     --template ${REPO_ROOT}/kops-templates/cluster_tpl.yml \
     --values ${REPO_ROOT}/kops-templates/cluster_defaults.yml \
-    --values ${REPO_ROOT}/state/kops/vars-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml >  \
+    --values ${REPO_ROOT}/state/kops/vars-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml \
+    --set QUAKE_BASTION="${QUAKE_BASTION}" >  \
       ${REPO_ROOT}/state/kops/full-manifest-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml
 
   echo -e "created cluster config:\n${REPO_ROOT}/state/kops/full-manifest-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml"

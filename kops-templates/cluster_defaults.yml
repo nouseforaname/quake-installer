@@ -9,3 +9,4 @@ QUAKE_MASTER_ZONES:
 QUAKE_CNI: calico
 QUAKE_KUBE_VERSION: 1.15.6
 QUAKE_BASE_IMAGE: kope.io/k8s-1.15-debian-stretch-amd64-hvm-ebs-2019-09-26
+QUAKE_BASTION: false

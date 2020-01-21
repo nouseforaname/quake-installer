@@ -262,3 +262,27 @@ metadata:
     kops.k8s.io/cluster: {{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}
 spec:
   publicKey: {{ .QUAKE_CLUSTER_SSH_PUB }}
+{{- if .QUAKE_BASTION }}
+---
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: {{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}
+  name: bastion-{{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}
+spec:
+  role: Bastion
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: "true"
+    k8s.io/cluster-autoscaler/{{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}: "{{ .QUAKE_CLUSTER_NAME }}.{{ .QUAKE_TLD }}"
+  associatePublicIp: true
+  image: {{ .QUAKE_BASE_IMAGE }}
+  machineType: t2.micro
+  maxSize: 1
+  minSize: 1
+  subnets:
+  {{- range $index, $zone := .QUAKE_MASTER_ZONES }}
+    - {{ $.QUAKE_REGION }}{{ $zone }}
+  {{- end }}
+{{- end }}
