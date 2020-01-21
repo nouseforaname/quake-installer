@@ -70,20 +70,16 @@ argo-events:
     replicaCount: 1
 
 argo-cd:
-
   installCRDs: true
-
   global:
     image:
       repository: argoproj/argocd
       tag: v1.3.6
       imagePullPolicy: IfNotPresent
-
   service:
     annotations: {}
     labels: {}
     port: 8082
-
   server:
     service:
       type: LoadBalancer
@@ -92,3 +88,8 @@ argo-cd:
         'service.beta.kubernetes.io/aws-load-balancer-backend-protocol': "https"
         'service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy': "ELBSecurityPolicy-TLS-1-2-2017-01"
         service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "{{ .QUAKE_CLUSTER_CERT_ARN }}"
+    useRollout: true
+configs:
+  secret:
+    createSecret: true
+    argocdServerAdminPassword: "{{ .QUAKE_ARGO_PASSWORD }}"
