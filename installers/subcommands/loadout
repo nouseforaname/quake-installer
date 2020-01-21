@@ -13,6 +13,7 @@ function get_params {
 
 function main {
   kubectl create namespace quake-system &> /dev/null
+  kubectl apply -n quake-system -f https://raw.githubusercontent.com/argoproj/argo-rollouts/stable/manifests/install.yaml
   local INDEX=0
   while true; do
     REPO_URL=$(yq r ${REPO_ROOT}/helm-templates/helm-sources.yml "QUAKE_HELM_SOURCES.${INDEX}.url")
@@ -40,11 +41,10 @@ function main {
       --template helm-templates/helm-values-template.yml \
       --values ${REPO_ROOT}/state/kops/vars-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml \
     ) ${CHART} > ${HELM_STATE}/${CHART}-values.yml
-
     helm upgrade --wait --install "quake-${CHART_NAME}" "${INSTALL_NAME}" \
-      --values ${HELM_STATE}/${CHART}-values.yml \
+      --values ${HELM_STATE}/${CHART_NAME}-values.yml \
       --version ${CHART_VERSION} \
-      --namespace quake-system
+      --namespace quake-system 
     ((INDEX+=1))
   done
 }
