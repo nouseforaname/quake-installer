@@ -14,6 +14,9 @@ function get_params {
 function main {
   kubectl create namespace quake-system &> /dev/null
   kubectl apply -n quake-system -f https://raw.githubusercontent.com/argoproj/argo-rollouts/stable/manifests/install.yaml
+  # https://github.com/argoproj/argo-rollouts/blob/45f3c4596a58d93ea57fea9252471143aca6af8c/docs/getting-started.md#cluster-level-installation
+  kubectl patch clusterrolebindings argo-rollouts-clusterrolebinding --type json --patch '[{"op": "replace", "path": "/subjects/0/namespace", "value": "quake-system"}]'
+
   local INDEX=0
   while true; do
     REPO_URL=$(yq r ${REPO_ROOT}/helm-templates/helm-sources.yml "QUAKE_HELM_SOURCES.${INDEX}.url")
@@ -38,7 +41,7 @@ function main {
     local HELM_STATE=${REPO_ROOT}/state/helm/${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}
     mkdir -p ${HELM_STATE} &> /dev/null
     yq r <( kops toolbox template \
-      --template helm-templates/helm-values-template.yml \
+      --template ${REPO_ROOT}/helm-templates/helm-values-template.yml \
       --values ${REPO_ROOT}/state/kops/vars-${QUAKE_CLUSTER_NAME}.${QUAKE_TLD}.yml \
     ) ${CHART} > ${HELM_STATE}/${CHART}-values.yml
     helm upgrade --wait --install "quake-${CHART_NAME}" "${INSTALL_NAME}" \
