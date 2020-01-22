@@ -42,6 +42,9 @@ output "QUAKE_KMS_ARN" {
 output "QUAKE_ARGO_PASSWORD" {
   value       =  random_password.argo_admin_password.result
 }
+output "QUAKE_ARGO_PASSWORD_BCRYPT" {
+  value       =  replace(bcrypt(random_password.argo_admin_password.result), "$2y","$2a")
+}
 /*
 output "QUAKE_" {
   value       =  
