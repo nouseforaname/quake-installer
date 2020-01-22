@@ -89,7 +89,8 @@ argo-cd:
         'service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy': "ELBSecurityPolicy-TLS-1-2-2017-01"
         service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "{{ .QUAKE_CLUSTER_CERT_ARN }}"
     useRollout: true
-configs:
-  secret:
-    createSecret: true
-    argocdServerAdminPassword: "{{ .QUAKE_ARGO_PASSWORD }}"
+
+  configs:
+    secret:
+      createSecret: true
+      argocdServerAdminPassword: "{{ .QUAKE_ARGO_PASSWORD_BCRYPT }}"
