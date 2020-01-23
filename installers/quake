@@ -10,6 +10,10 @@ fi
 while [[ $# -gt 0 ]];
 do
   case $1 in
+  -w | --workflow )
+    source $REPO_ROOT/installers/subcommands/workflow
+    main "${@}"
+  ;;
   -i | --install )
     source $REPO_ROOT/installers/subcommands/cli-install
     main

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+function main {
+  while [[ $# -gt 0 ]];
+  do
+    case $1 in
+    -u | --url )
+      shift;
+      export GIT_URL=$1
+      echo "set git url"
+    ;;
+    esac
+    shift
+  done
+
+  if [[ -z "$GIT_URL" ]]; then
+    echo "no git repo was provided, use flag -u git@your.repo.com"
+    exit 1
+  fi
+
+  pushd ${REPO_ROOT}/terraform
+    local GIT_KEY_BASE64=$(terraform output QUAKE_CLUSTER_GITOPS_SSH_KEY | base64 -w 0)
+  popd
+
+  pushd ${REPO_ROOT}/workflow
+    cat give-argo-access-to-private-repo-template.yml \
+      | sed "s#SED_PLACE_HOLDER_PRIVATE_KEY_BASE64#$GIT_KEY_BASE64#" \
+      | sed "s#SED_PLACE_HOLDER_REPO_GIT_URL#$GIT_URL#" \
+    > my-argo-workflow.yml
+  popd
+
+  echo -e "your workflow is now ready to apply\nrun: kubectl -n quake-system apply -f ${REPO_ROOT}/workflow/my-argo-workflow.yml"
+}

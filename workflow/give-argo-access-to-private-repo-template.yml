@@ -1,0 +1,110 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: config-argo-workflow
+  generateName: config-argo-steps-
+spec:
+  serviceAccountName: argo
+  entrypoint: configure
+  templates:
+  - name: configure
+    # Instead of just running a container
+    # This template has a sequence of steps
+    steps:
+
+    # BLOCK A RUN IN PARALLEL
+    - - name: write-secret           # double dash => run after previous step
+        template: write-file
+        arguments:
+          parameters:
+          - name: type
+            value: secret
+          - name: value
+            value: |
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: my-gitops-secret
+                namespace: quake-system
+              type: Opaque
+              data:
+                sshPrivateKey: SED_PLACE_HOLDER_PRIVATE_KEY_BASE64
+      - name: write-patch           # single dash => run in parallel with previous step
+        template: write-file
+        arguments:
+          parameters:
+          - name: type
+            value: patch
+          - name: value
+            value: |
+              data:
+                repositories: |
+                  - url: SED_PLACE_HOLDER_REPO_GIT_URL
+                    name: argo-apps
+                    type: git
+                    sshPrivateKeySecret:
+                      name: my-gitops-secret
+                      key: sshPrivateKey
+    # BLOCK A RUN IN PARALLEL END
+    # BLOCK B RUN IN PARALLEL
+    - - name: create-secret
+        template: kubectl-commands   
+        arguments:
+          parameters:
+          - name: action
+            value: apply
+          artifacts:
+          - name: my-files
+            from: "{{steps.write-secret.outputs.artifacts.my-file-output}}"
+      - name: patch-argocd-cm
+        template: kubectl-commands   
+        arguments:
+          parameters:
+          - name: action
+            value: patch
+          artifacts:
+          - name: my-files
+            from: "{{steps.write-patch.outputs.artifacts.my-file-output}}"
+    # BLOCK B RUN IN PARALLEL END
+
+
+    # BLOCK C TEMPLATES FOR ABOVE STEPS
+  - name: kubectl-commands
+    inputs:
+      parameters:
+      - name: action
+      artifacts:
+      - name: my-files
+        path: /input.yml
+    container:
+      image: bitnami/kubectl:latest
+      command: [bash, -c]
+      args:
+      - | 
+          if [[ "{{inputs.parameters.action}}" == "apply" ]]; then
+            kubectl -n quake-system apply -f /input.yml
+          elif [[ "{{inputs.parameters.action}}" == "patch" ]]; then
+            kubectl -n quake-system patch cm/argocd-cm --patch "$(cat input.yml)"
+          fi 
+  - name: write-file
+    inputs:
+      parameters:
+      - name: value
+      - name: type
+    outputs: 
+      artifacts:
+      - name: my-file-output
+        path: /tmp/output.yml
+    container:
+      image: alpine:latest
+      command: [sh, -c]
+      args:
+      - |
+          if [ "{{inputs.parameters.type}}" == "secret" ]; then
+            echo "creating secret"
+          elif  [ "{{inputs.parameters.type}}" == "patch" ]; then
+            echo "creating patch"
+          fi
+
+          echo "{{inputs.parameters.value}}" | tee /tmp/output.yml
+    # BLOCK C TEMPLATES FOR ABOVE STEPS
