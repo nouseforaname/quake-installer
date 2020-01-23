@@ -179,32 +179,8 @@ spec:
         {
           "Effect": "Allow",
           "Action": [
-            "cognito-idp:DescribeUserPoolClient"
-          ],
-          "Resource": "*"
-        },
-        {
-          "Effect": "Allow",
-          "Action": [
-            "waf-regional:GetWebACLForResource",
-            "waf-regional:GetWebACL",
-            "waf-regional:AssociateWebACL",
-            "waf-regional:DisassociateWebACL"
-          ],
-          "Resource": "*"
-        },
-        {
-          "Effect": "Allow",
-          "Action": [
             "tag:GetResources",
             "tag:TagResources"
-          ],
-          "Resource": "*"
-        },
-        {
-          "Effect": "Allow",
-          "Action": [
-            "waf:GetWebACL"
           ],
           "Resource": "*"
         }
