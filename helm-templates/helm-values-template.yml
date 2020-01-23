@@ -46,7 +46,14 @@ argo:
     executor: argoexec
     pullPolicy: Always
     tag: v2.4.3
-
+  useDefaultArtifactRepo: true
+  useStaticCredentials: false
+  artifactRepository:
+    s3:
+      bucket: {{ .QUAKE_TLD }}-state
+      endpoint: s3.amazonaws.com
+      keyPrefix: argo
+      insecure: false
 # ARGO EVENTS
 
 argo-events:
