@@ -75,6 +75,15 @@ spec:
           ]
         },
 {{- end }}
+
+       {
+          "Effect":"Allow",
+          "Action":[
+             "s3:Put*",
+             "s3:Get*"
+          ],
+          "Resource":"arn:aws:s3:::{{ .QUAKE_TLD }}-state/argo/*"
+       },
        {
          "Effect": "Allow",
          "Action": [
