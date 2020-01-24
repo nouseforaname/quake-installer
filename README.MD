@@ -29,7 +29,9 @@ to play with KOPS TF feature, you can use
 ### Deploy ArgoCD, External-DNS, and Ingress via HELM
 ```installers/quake --loadout```
 ### Template & Register Quake System HELM Applications via with argo KubeCTL
-```installers/quake --template-apps```
+```installers/quake --template```
+### Create an example workflow
+```installers/quake --workflow```
 
 ###
 ### Delete Cluster
