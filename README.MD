@@ -31,7 +31,7 @@ to play with KOPS TF feature, you can use
 The next step is adding automation and a few platform components.
 ### Deploy ArgoProj (ArgoCD, ArgoEvents, ArgoWorkflows, ArgoRollouts), External-DNS, and Ingress via HELM
 ```installers/quake --loadout```
-### Template & Register Quake System HELM Applications via with argo KubeCTL
+### Template & Register Quake System HELM Applications with ArgoCD via KubeCTL
 ```installers/quake --template```
 ### Create an example workflow
 ```installers/quake --workflow```
