@@ -15,6 +15,8 @@ function main {
   kubectl create namespace quake-system &> /dev/null
 
   kubectl apply -n quake-system -f https://raw.githubusercontent.com/argoproj/argo-rollouts/stable/manifests/install.yaml
+  kubectl create clusterrolebinding workflow-admin --clusterrole=cluster-admin --serviceaccount=quake-system:argo &> /dev/null
+
   # https://github.com/argoproj/argo-rollouts/blob/45f3c4596a58d93ea57fea9252471143aca6af8c/docs/getting-started.md#cluster-level-installation
   kubectl patch clusterrolebindings argo-rollouts-clusterrolebinding --type json --patch '[{"op": "replace", "path": "/subjects/0/namespace", "value": "quake-system"}]'
 
