@@ -19,7 +19,10 @@ To run terraform and manipulate the outputs into config files
 
 ### finish level
 to interpolate and deploy the provided kops cluster template with defaults and terraform outputs. It will save a full cluster config and a cluster vars YAML into the state directory.
-```installers/quake --deploy #--jumphost #uncomment flag to also deploy an instance group for ssh access to your vpc
+
+```installers/quake --deploy```
+You can add ```--jumphost``` to also deploy an instance group of jumphosts for ssh access to your vpc
+
 ```
 to play with KOPS TF feature, you can use 
 ```ìnstallers/quake --deploy -o tf``` it will instead create the `kops-terraform-output` folder and save generated TF there
