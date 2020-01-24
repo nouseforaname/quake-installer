@@ -13,6 +13,7 @@ do
   -w | --workflow )
     source $REPO_ROOT/installers/subcommands/workflow
     main "${@}"
+    break;
   ;;
   -i | --install )
     source $REPO_ROOT/installers/subcommands/cli-install
