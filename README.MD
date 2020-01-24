@@ -23,13 +23,13 @@ to interpolate and deploy the provided kops cluster template with defaults and t
 ```installers/quake --deploy```
 You can add ```--jumphost``` to also deploy an instance group of jumphosts for ssh access to your vpc
 
-```
 to play with KOPS TF feature, you can use 
-```ìnstallers/quake --deploy -o tf``` it will instead create the `kops-terraform-output` folder and save generated TF there
+```ìnstallers/quake --deploy -o tf``` it will instead create the `kops-terraform-output` folder and save generated TF there instead of using the KOPS cli to deploy everything.
 
 ### you should now have a kubernetes cluster up and running 
 
-### Deploy ArgoCD, External-DNS, and Ingress via HELM
+The next step is adding automation and a few platform components.
+### Deploy ArgoProj (ArgoCD, ArgoEvents, ArgoWorkflows, ArgoRollouts), External-DNS, and Ingress via HELM
 ```installers/quake --loadout```
 ### Template & Register Quake System HELM Applications via with argo KubeCTL
 ```installers/quake --template```
